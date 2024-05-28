@@ -26,7 +26,7 @@ public class TrainService {
 			throw new IllegalArgumentException("Invalid section. Section must be 'A' or 'B'.");
 		}
 
-		Ticket ticket = new Ticket(from, to, user, 20.0, section);
+		Ticket ticket = new Ticket(from, to, user, 20.0, normalSection);
 		tickets.add(ticket);
 
 		seats.putIfAbsent(normalSection, new ArrayList<>());
