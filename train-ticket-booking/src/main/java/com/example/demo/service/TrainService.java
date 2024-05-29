@@ -18,57 +18,64 @@ public class TrainService {
 		seats.put("B", new ArrayList<>());
 	}
 
-	public Ticket puchaseTicket(String from, String to, User user, String section) {
+	public Ticket purchaseTicket(String from, String to, User user, String section) {
+        if (from == null || to == null || user == null || section == null || (!section.equals("A") && !section.equals("B"))) {
+            throw new IllegalArgumentException("Invalid input. Section must be 'A' or 'B'.");
+        }
+        Ticket ticket = new Ticket(from, to, user, 20.0, section);
+        tickets.add(ticket);
 
-		String normalSection = section.toUpperCase();
+        if (!seats.containsKey(section)) {
+            seats.put(section, new ArrayList<>());
+        }
 
-		if (!normalSection.equals("A") && !normalSection.equals("B")) {
-			throw new IllegalArgumentException("Invalid section. Section must be 'A' or 'B'.");
-		}
+        seats.get(section).add(ticket);
+        return ticket;
+    }
 
-		Ticket ticket = new Ticket(from, to, user, 20.0, normalSection);
-		tickets.add(ticket);
+    public Ticket getTicketDetails(User user) {
+        if (user == null || user.getEmail() == null) {
+            throw new IllegalArgumentException("User or email cannot be null.");
+        }
+        for (Ticket ticket : tickets) {
+            if (ticket.getUser().getEmail().equals(user.getEmail())) {
+                return ticket;
+            }
+        }
+        return null;
+    }
 
-		seats.putIfAbsent(normalSection, new ArrayList<>());
-		seats.get(normalSection).add(ticket);
-		return ticket;
-	}
+    public List<Ticket> getUsers(String section) {
+        if (section == null || (!section.equals("A") && !section.equals("B"))) {
+            throw new IllegalArgumentException("Section must be 'A' or 'B'.");
+        }
+        return seats.get(section);
+    }
 
-	public Ticket getTicketDetails(User user) {
+    public boolean removeUser(User user) {
+        if (user == null || user.getEmail() == null) {
+            throw new IllegalArgumentException("User or email cannot be null.");
+        }
+        Ticket ticket = getTicketDetails(user);
+        if (ticket != null) {
+            tickets.remove(ticket);
+            seats.get(ticket.getSeat()).remove(ticket);
+            return true;
+        }
+        return false;
+    }
 
-		for (Ticket ticket : tickets) {
-			if (ticket.getUser().getEmail().equals(user.getEmail())) {
-				return ticket;
-			}
-		}
-
-		return null;
-	}
-
-	public List<Ticket> getUsers(String section) {
-		return seats.get(section);
-	}
-
-	public boolean removeUser(User user) {
-
-		Ticket ticket = getTicketDetails(user);
-		if (ticket != null) {
-			tickets.remove(ticket);
-			seats.get(ticket.getSeat()).remove(ticket);
-			return true;
-		}
-
-		return false;
-	}
-
-	public boolean updateUserSeat(User user, String newSection) {
-		Ticket ticket = getTicketDetails(user);
-		if (ticket != null) {
-			seats.get(ticket.getSeat()).remove(ticket);
-			ticket.setSeat(newSection);
-			seats.get(newSection).add(ticket);
-			return true;
-		}
-		return false;
-	}
+    public boolean updateUserSeat(User user, String newSection) {
+        if (user == null || user.getEmail() == null || newSection == null || (!newSection.equals("A") && !newSection.equals("B"))) {
+            throw new IllegalArgumentException("Invalid input. New section must be 'A' or 'B'");
+        }
+        Ticket ticket = getTicketDetails(user);
+        if (ticket != null) {
+            seats.get(ticket.getSeat()).remove(ticket);
+            ticket.setSeat(newSection);
+            seats.get(newSection).add(ticket);
+            return true;
+        }
+        return false;
+    }
 }
